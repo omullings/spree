@@ -55,8 +55,12 @@ module Spree
                                                                         :selected => selected)
     end
 
+    def selected_shipping_rate
+      shipping_rates.where(selected: true).first
+    end
+
     def selected_shipping_rate_id
-      shipping_rates.where(selected: true).first.try(:id)
+      selected_shipping_rate.try(:id)
     end
 
     def selected_shipping_rate_id=(id)
@@ -69,6 +73,7 @@ module Spree
       shipping_rates.exists?(selected: true) ||
         shipping_rates.limit(1).update_all(selected: true)
     end
+
 
     def currency
       order.nil? ? Spree::Config[:currency] : order.currency
@@ -191,7 +196,7 @@ module Spree
         if adjustment
           adjustment.originator = shipping_method
           adjustment.label = shipping_method.name
-          adjustment.amount = shipping_rates.where(selected: true).first.cost
+          adjustment.amount = selected_shipping_rate.cost
           adjustment.save!
       	  adjustment.reload
 
